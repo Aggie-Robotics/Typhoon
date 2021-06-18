@@ -76,7 +76,7 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
-void opcontrol() {
+[[noreturn]] void opcontrol() {
 //    okapi::MotorGroup left_drive_side = {-2, -3, -4};
 //    okapi::MotorGroup right_drive_side = {12, 13, 14};
 //    std::shared_ptr<okapi::ChassisController> driveController = okapi::ChassisControllerBuilder()
@@ -122,10 +122,10 @@ void opcontrol() {
         }
 
 
-        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
             bottom_rollers0 = 127;
             bottom_rollers1 = 127;
-        } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+        } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
             bottom_rollers0 = -127;
             bottom_rollers1 = -127;
 
@@ -137,26 +137,24 @@ void opcontrol() {
 
         if (master.get_digital(pros::E_CONTROLLER_DIGITAL_A))
             top_roller = 127;
-        else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
+        else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
             top_roller = -127;
         else {
             top_roller = 0;
         }
 
 
-        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-            left_intake = 100;
-            right_intake = 100;
-        } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
-            left_intake = -80;
-            right_intake = -80;
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)) {
+            left_intake = 127;
+            right_intake = 127;
+        } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+            left_intake = -127;
+            right_intake = -127;
         } else {
             left_intake = 0;
             right_intake = 0;
         }
 
         pros::delay(20);
-
-
     }
 }
