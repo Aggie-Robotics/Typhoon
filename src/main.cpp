@@ -1,5 +1,7 @@
 #include "main.h"
 #include "okapi/api.hpp"
+#include <vector>
+#include "PID.h"
 
 using namespace okapi;
 //update pros.c
@@ -62,6 +64,8 @@ void run_pid(
     }
     apply_function(0);
 }
+//tick to inches
+double ticktoinch=51.72;
 //PID constants
 #define ROBOT_TARGET_15
 #ifdef ROBOT_TARGET_15
@@ -295,7 +299,222 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+
+
+///Aarons Stupid code
+void setDrive(int left,int right){
+    left0=left;
+    left1=left;
+    left2=left;
+
+    right0=right;
+    right1=right;
+    right2=right;
+}
+void resetDriveEncoders(){
+    left0.tare_position();
+    left1.tare_position();
+    left2.tare_position();
+
+    right0.tare_position();
+    right1.tare_position();
+    right2.tare_position();
+}
+double averageDriveEncoderValue(){
+    //gets all drive encoder values and averages it
+    return (((fabs((left0.get_position())))+
+            (fabs((left1.get_position())))+
+            (fabs((left2.get_position())))+
+            (fabs((right0.get_position())))+
+            (fabs((right1.get_position())))+
+            (fabs((right2.get_position())))/ 6));
+}
+void translate(int units, int voltage){ //amount of travel, power)
+    //negative means backwards
+    int direction = std::abs(units)/units;
+    //gyro assuming turning right is negative
+    //reset motor encoders
+    resetDriveEncoders();
+    imu.tare();
+    //drive forward until units are reached
+    while(std::abs(averageDriveEncoderValue()) < std::abs(units)){
+        //setDrive(voltage*direction,voltage*direction); //dum version
+        setDrive(voltage*direction+imu.get_rotation(),voltage*direction-imu.get_rotation() ); //trying to utlizie imu to correct if off
+        pros::delay(10);
+    }
+    //brief brake
+    setDrive(-10*direction,-10*direction);
+    pros::delay(50);//may adjust
+    //set drive back to neautral
+   setDrive(0,0);
+
+}
+void rotate(int units,int voltage){
+}
+void intake4ever(int value){
+    left_intake=value;
+    right_intake=value;
+}
+void bottom4ever(int value){
+    bottom_rollers0=value;
+    bottom_rollers1=value;
+}
+void stoprollers(){
+    left_intake =0;
+    right_intake=0;
+    bottom_rollers0=0;
+    bottom_rollers1=0;
+}
+void intake(int value, float time){
+    left_intake=value;
+    right_intake=value;
+    pros::delay(time);
+    left_intake=0;
+    right_intake=0;
+}
+void bottom_rollers(int value, float time){
+    bottom_rollers0=value;
+    bottom_rollers1=value;
+    pros::delay(time);
+    bottom_rollers0=0;
+    bottom_rollers1=0;
+}
+void top_rollers(int value, float time){
+    top_roller=value;
+    pros::delay(time);
+    top_roller=0;
+}
+void intake_bottom_rollers(int value, float time){
+    bottom_rollers0=-value;
+    bottom_rollers1=-value;
+    left_intake=-value;
+    right_intake=-value;
+    pros::delay(time);
+    bottom_rollers0=0;
+    bottom_rollers1=0;
+    left_intake=0;
+    right_intake=0;
+}
+
+void bottom_top_rollers(int value, float time){
+    bottom_rollers0=value;
+    bottom_rollers1=value;
+    top_roller=value;
+    pros::delay(time);
+    bottom_rollers0=0;
+    bottom_rollers1=0;
+    top_roller=0;
+}
+void pickup(int value, float time){
+    left_intake=value;
+    right_intake=value;
+    bottom_rollers0=value;
+    bottom_rollers1=value;
+    top_roller=-value;
+    pros::delay(time);
+    bottom_rollers0=0;
+    bottom_rollers1=0;
+    top_roller=0;
+    left_intake=0;
+    right_intake=0;
+}
+void drivetime(int value,float time){
+    right0=value;
+    right1=value;
+    right2=value;
+    left1=value;
+    left2=value;
+    left0=value;
+    pros::delay(time);
+    right0=0;
+    right1=0;
+    right2=0;
+    left1=0;
+    left2=0;
+    left0=0;
+}
+
+void destow(float time){
+    left_intake=-127;
+    right_intake=-127;
+    bottom_rollers0=127;
+    bottom_rollers1=127;
+    pros::delay(time);
+    bottom_rollers0=0;
+    bottom_rollers1=0;
+    top_roller=0;
+    left_intake=0;
+    right_intake=0;
+}
+void skills(){
+    //destow
+    destow(500);
+    //run forever intake and bottom roller
+    intake4ever(-127);
+    bottom4ever( -60);
+    //drive to pick up first 2 balls at an angle
+    drive_for_distance((ticktoinch*39),leftDrive,rightDrive,0.75);
+    stoprollers();
+    //backs up to get ready 1st corner goal
+    drive_for_distance(-(ticktoinch*9),leftDrive,rightDrive,0.75);
+    turn(-80,leftDrive,rightDrive,1.0);
+    //facing corner goal
+    drive_for_distance((ticktoinch*13),leftDrive,rightDrive,0.75);
+    drivetime(127,250); //have to do time to not break auton
+    //cycle corner goal
+    stoprollers();
+    pickup(-100, 700);
+    //descore
+    intake_bottom_rollers(100, 500);
+    //spit out the balls descored
+    drive_for_distance(-(ticktoinch*10),leftDrive,rightDrive,0.75);
+    intake_bottom_rollers(-80, 750);
+    //1st corner goal done
+    //
+    drive_for_distance(-(ticktoinch*26),leftDrive,rightDrive,0.75);
+    //turn to face red ball near center
+    turn(-120,leftDrive,rightDrive,1);
+    //backup to square on wall
+    drive_for_distance(-ticktoinch*14,leftDrive,rightDrive,0.75);
+    drivetime(-50,1500);
+    pickup(100,400);
+    //intake center red ball
+    intake4ever(-127);
+    bottom4ever( -60);
+    //driving to center ball
+    drive_for_distance((ticktoinch*64.5),leftDrive,rightDrive,0.5);
+    //turn -90 towards center goal on wall
+    turn(95,leftDrive,rightDrive,1);
+    //intake ball on way to center goal
+    drive_for_distance(ticktoinch*22,leftDrive,rightDrive,0.5);
+    stoprollers();
+    drivetime(100,300);
+    //score two in center goal
+   // pickup(-127,700);
+    //second goal scored
+    //
+    //start to third goal
+    //drive to goal on white line
+    drive_for_distance(-(ticktoinch*5),leftDrive,rightDrive,0.75);
+    //spit out blue ball
+    intake_bottom_rollers(-80, 750);
+    pickup(100,400);
+    turn(-90,leftDrive,rightDrive,1);
+    intake4ever(-127);
+    bottom4ever(-60);
+    drive_for_distance((ticktoinch*50),leftDrive,rightDrive,0.5);
+    turn(45,leftDrive,rightDrive,1);
+    drive_for_distance(ticktoinch*15,leftDrive,rightDrive,0.5);
+    drivetime(127,500);
+    pickup(-127,1000);
+
+}
+void AutonMatch(){
+
+}
+void autonomous() {
+    skills();
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -310,6 +529,8 @@ void autonomous() {}
  * operator control task will be stopped. Re-enabling the robot will restart the
  * task, not resume it from where it left off.
  */
+
+
 void opcontrol() {
 //Typhoon
 
@@ -318,7 +539,27 @@ void opcontrol() {
 
 
     while (true) {
+        //drivetrain Code
+        // split arcade
+       /*
+        int power =master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
+        //arcade_drive(power/127.0, turn/127.0);
+
+        int left = power+turn;
+        int right=power-turn;
+
+        left0=left;
+        left1=left;
+        left2=left;
+
+        right0=right;
+        right1=right;
+        right2=right;
+        //end of split arcade control
+*/
+       //Tank
         int left = master.get_analog(ANALOG_LEFT_Y);
         int right = master.get_analog(ANALOG_RIGHT_Y);
 
@@ -361,7 +602,6 @@ void opcontrol() {
             bottom_rollers1 = 0;
         }
 
-
         if (master.get_digital(pros::E_CONTROLLER_DIGITAL_A))
             top_roller = 127;
         else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2))
@@ -383,7 +623,5 @@ void opcontrol() {
         }
 
         pros::delay(20);
-
-
     }
 }
