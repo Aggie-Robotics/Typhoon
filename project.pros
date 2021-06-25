@@ -1,7 +1,7 @@
 {
     "py/object": "pros.conductor.project.Project",
     "py/state": {
-        "project_name": "Typhoon",
+        "project_name": "TyphoonPain",
         "target": "v5",
         "templates": {
             "kernel": {

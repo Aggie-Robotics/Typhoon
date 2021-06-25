@@ -101,7 +101,7 @@ constexpr double DRIVE_MATCH_MAX_I = 50;
 /// angle: angle to turn to in degrees
 /// multiplier: 1.0 for normal speed, 0.5 for half speed
 /// timeout_ms: timeout in ms, 0 for no timeout
-void turn(double degrees, Motorgroup& left_drive, Motorgroup& right_drive, double multiplier = 1, uint32_t timeout_ms = 0){
+void turn(double degrees, Motorgroup& left_drive, Motorgroup& right_drive, double multiplier = 1, uint32_t timeout_ms = 1000){
     const auto start = imu.get_rotation();
     const auto target = start + degrees;
     run_pid(
@@ -255,7 +255,7 @@ void initialize() {
     right0.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
     right1.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
     right2.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-    top_roller.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+    top_roller.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
     pros::lcd::set_text(1, "Winner Winner Chicken Dinner!");
 
     leftDrive.push_back(left0);
@@ -313,11 +313,21 @@ void autonomous() {}
 void opcontrol() {
 //Typhoon
 
+    int lastPower_left = 0;
+    int lastPower_right = 0;
+
 
     while (true) {
 
         int left = master.get_analog(ANALOG_LEFT_Y);
         int right = master.get_analog(ANALOG_RIGHT_Y);
+
+        left = std::max(left, lastPower_left - 10);
+        right = std::max(right, lastPower_right - 10);
+
+        lastPower_right = right;
+        lastPower_left = left;
+
         int threshold = 0;
         if (abs(left) > threshold) {
             left0 = left;
@@ -338,7 +348,7 @@ void opcontrol() {
             right2 = 0;
         }
 
-*/
+
         if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
             bottom_rollers0 = 127;
             bottom_rollers1 = 127;
