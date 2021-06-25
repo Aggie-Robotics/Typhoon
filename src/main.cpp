@@ -413,13 +413,15 @@ void intake_bottom_rollers(int value, float time){
 }
 
 void bottom_top_rollers(int value, float time){
+
     bottom_rollers0=value;
     bottom_rollers1=value;
-    top_roller=value;
+    top_roller=-value;
     pros::delay(time);
     bottom_rollers0=0;
     bottom_rollers1=0;
     top_roller=0;
+
 }
 void pickup(int value, float time){
     left_intake=value;
@@ -525,19 +527,26 @@ void skills(){
     pickup(-127,1000);
 
 }
-void AutonMatch(){
 
+void AutonMatch(){
+    destow(500);
+
+    drive_for_distance((ticktoinch*24),leftDrive,rightDrive,0.40, 5000);
+
+    turn(-133,leftDrive,rightDrive,0.5);
+    intake4ever(-127);
+    bottom4ever(-80);
+    drive_for_distance((ticktoinch*20),leftDrive,rightDrive,0.40, 5000);
+    stoprollers();
+    drive_for_distance(ticktoinch*4.5,leftDrive,rightDrive,0.40, 5000);
+    bottom_top_rollers(-127, 750);
+    intake4ever(75);
 }
 void autonomous() {
    // skills();
-   drive_for_distance((ticktoinch*25),leftDrive,rightDrive,0.40, 5000);
-    turn(-135,leftDrive,rightDrive,0.5);
-    drive_for_distance((ticktoinch*24),leftDrive,rightDrive,0.40, 5000);
-    //turn(-90,leftDrive,rightDrive,0.5);
-    //drive_for_distance((ticktoinch*40),leftDrive,rightDrive,0.40, 5000);
-    //turn(-90,leftDrive,rightDrive,0.5);
-    //drive_for_distance((ticktoinch*40),leftDrive,rightDrive,0.40, 5000);
-    //turn(-90,leftDrive,rightDrive,0.5);
+   AutonMatch();
+
+
 }
 
 /**
