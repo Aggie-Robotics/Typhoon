@@ -158,7 +158,8 @@ void turn_to_angle(double angle, Motorgroup& left_drive, Motorgroup& right_drive
 /// angle: angle to turn to in degrees
 /// multiplier: 1.0 for normal speed, 0.5 for half speed
 /// timeout_ms: timeout in ms, 0 for no timeout
-void drive_for_distance(int32_t distance, Motorgroup& left_drive, Motorgroup& right_drive, double multiplier = 1, uint32_t timeout_ms = 0){
+void drive_for_distance(int32_t distance_in, Motorgroup& left_drive, Motorgroup& right_drive, double multiplier = 1, uint32_t timeout_ms = 0){
+    int32_t distance=distance_in*ticktoinch;
     auto end = pros::millis() + timeout_ms;
     const auto start_angle = imu.get_rotation();
     const auto left_start = left_drive[0].get_raw_position(nullptr);
@@ -471,13 +472,13 @@ void skills(){
     intake4ever(-127);
     bottom4ever( -60);
     //drive to pick up first 2 balls at an angle
-    drive_for_distance((ticktoinch*39),leftDrive,rightDrive,0.75);
+    drive_for_distance(39,leftDrive,rightDrive,0.75);
     stoprollers();
     //backs up to get ready 1st corner goal
-    drive_for_distance(-(ticktoinch*9),leftDrive,rightDrive,0.75);
+    drive_for_distance(-9,leftDrive,rightDrive,0.75);
     turn(-80,leftDrive,rightDrive,1.0);
     //facing corner goal
-    drive_for_distance((ticktoinch*13),leftDrive,rightDrive,0.75);
+    drive_for_distance(13,leftDrive,rightDrive,0.75);
     drivetime(127,250); //have to do time to not break auton
     //cycle corner goal
     stoprollers();
@@ -485,26 +486,26 @@ void skills(){
     //descore
     intake_bottom_rollers(100, 500);
     //spit out the balls descored
-    drive_for_distance(-(ticktoinch*10),leftDrive,rightDrive,0.75);
+    drive_for_distance(-10,leftDrive,rightDrive,0.75);
     intake_bottom_rollers(-80, 750);
     //1st corner goal done
     //
-    drive_for_distance(-(ticktoinch*26),leftDrive,rightDrive,0.75);
+    drive_for_distance(-26,leftDrive,rightDrive,0.75);
     //turn to face red ball near center
     turn(-120,leftDrive,rightDrive,1);
     //backup to square on wall
-    drive_for_distance(-ticktoinch*14,leftDrive,rightDrive,0.75);
+    drive_for_distance(-14,leftDrive,rightDrive,0.75);
     drivetime(-50,1500);
     pickup(100,400);
     //intake center red ball
     intake4ever(-127);
     bottom4ever( -60);
     //driving to center ball
-    drive_for_distance((ticktoinch*64.5),leftDrive,rightDrive,0.5);
+    drive_for_distance(64.5,leftDrive,rightDrive,0.5);
     //turn -90 towards center goal on wall
     turn(95,leftDrive,rightDrive,1);
     //intake ball on way to center goal
-    drive_for_distance(ticktoinch*22,leftDrive,rightDrive,0.5);
+    drive_for_distance(22,leftDrive,rightDrive,0.5);
     stoprollers();
     drivetime(100,300);
     //score two in center goal
@@ -513,16 +514,16 @@ void skills(){
     //
     //start to third goal
     //drive to goal on white line
-    drive_for_distance(-(ticktoinch*5),leftDrive,rightDrive,0.75);
+    drive_for_distance(-5,leftDrive,rightDrive,0.75);
     //spit out blue ball
     intake_bottom_rollers(-80, 750);
     pickup(100,400);
     turn(-90,leftDrive,rightDrive,1);
     intake4ever(-127);
     bottom4ever(-60);
-    drive_for_distance((ticktoinch*50),leftDrive,rightDrive,0.5);
+    drive_for_distance(50,leftDrive,rightDrive,0.5);
     turn(45,leftDrive,rightDrive,1);
-    drive_for_distance(ticktoinch*15,leftDrive,rightDrive,0.5);
+    drive_for_distance(15,leftDrive,rightDrive,0.5);
     drivetime(127,500);
     pickup(-127,1000);
 
