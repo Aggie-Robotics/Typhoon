@@ -2,6 +2,7 @@
 #include "okapi/api.hpp"
 #include <vector>
 #include "PID.h"
+#include <iostream>
 
 using namespace okapi;
 //update pros.c
@@ -65,20 +66,20 @@ void run_pid(
     apply_function(0);
 }
 //tick to inches
-double ticktoinch=51.72;
+double ticktoinch=49.2;
 //PID constants
 #define ROBOT_TARGET_15
 #ifdef ROBOT_TARGET_15
 //turning
 constexpr double TURN_P = 10;
 constexpr double TURN_I = 1;
-constexpr double TURN_D = 0.5;
+constexpr double TURN_D = 0.8;
 constexpr double TURN_I_MAX = 50;
 //driving
-constexpr double DRIVE_P = 75;
-constexpr double DRIVE_I = 0;
-constexpr double DRIVE_D = 5;
-constexpr double DRIVE_I_MAX = 50;
+constexpr double DRIVE_P = 0.5;
+constexpr double DRIVE_I = 0.0001;
+constexpr double DRIVE_D = 0.001;
+constexpr double DRIVE_I_MAX = 30;
 //secondary driving making sure angle doesn't change
 constexpr double DRIVE_MATCH_P = 2;
 constexpr double DRIVE_MATCH_I = 0;
@@ -162,20 +163,20 @@ void drive_for_distance(int32_t distance, Motorgroup& left_drive, Motorgroup& ri
     const auto start_angle = imu.get_rotation();
     const auto left_start = left_drive[0].get_raw_position(nullptr);
     const auto right_start = right_drive[0].get_raw_position(nullptr);
-
+    double real_drive_i_max = DRIVE_I_MAX/multiplier;
     SpencerPID::PID left_distance_pid{
             (double)left_start + distance,
             [&left_drive](){
                 return left_drive[0].get_raw_position(nullptr);
             },
-            DRIVE_P, DRIVE_I, DRIVE_D, DRIVE_I_MAX
+            DRIVE_P, real_drive_i_max, DRIVE_D, DRIVE_I_MAX
     };
     SpencerPID::PID right_distance_pid{
             (double)right_start + distance,
             [&right_drive](){
                 return right_drive[0].get_raw_position(nullptr);
             },
-            DRIVE_P, DRIVE_I, DRIVE_D, DRIVE_I_MAX
+            DRIVE_P, real_drive_i_max, DRIVE_D, DRIVE_I_MAX
     };
     SpencerPID::PID match_pid{
             start_angle,
@@ -186,14 +187,29 @@ void drive_for_distance(int32_t distance, Motorgroup& left_drive, Motorgroup& ri
     };
 
     uint32_t count = 0;
+    int left_stop = 0;
 
-    constexpr double forward_backward_tolerance = 50;
+    constexpr double forward_backward_tolerance = 9;
 
-    while(count < 100 && (timeout_ms == 0 || pros::millis() < end)){
+    //while(count < 100 && (timeout_ms == 0 || pros::millis() < end)){
+    while(pros::millis() < end){
+
+
         auto left_result = left_distance_pid.run();
         auto right_result = right_distance_pid.run();
         auto match_result = match_pid.run();
+        pros::lcd::set_text(2, std::to_string(left_result.error));
+        pros::lcd::set_text(3, std::to_string(left_stop));
 
+        if( abs(left_result.error)<=10){
+           left_stop+=1;
+       }
+       else{
+           left_stop = 0;
+       }
+       if(left_stop>=100){
+           break;
+       }
         if(
                 left_result.error < forward_backward_tolerance
                 && right_result.error < forward_backward_tolerance
@@ -513,7 +529,15 @@ void AutonMatch(){
 
 }
 void autonomous() {
-    skills();
+   // skills();
+   drive_for_distance((ticktoinch*25),leftDrive,rightDrive,0.40, 5000);
+    turn(-135,leftDrive,rightDrive,0.5);
+    drive_for_distance((ticktoinch*24),leftDrive,rightDrive,0.40, 5000);
+    //turn(-90,leftDrive,rightDrive,0.5);
+    //drive_for_distance((ticktoinch*40),leftDrive,rightDrive,0.40, 5000);
+    //turn(-90,leftDrive,rightDrive,0.5);
+    //drive_for_distance((ticktoinch*40),leftDrive,rightDrive,0.40, 5000);
+    //turn(-90,leftDrive,rightDrive,0.5);
 }
 
 /**
