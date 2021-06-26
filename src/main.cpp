@@ -9,21 +9,21 @@ using namespace okapi;
 //pros v5 run 8
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 //Drivetrain
-pros::Motor left0(2,pros::E_MOTOR_GEARSET_06,true,pros::E_MOTOR_ENCODER_COUNTS);
-pros::Motor left1( 3,pros::E_MOTOR_GEARSET_06,true,pros::E_MOTOR_ENCODER_COUNTS);
-pros::Motor left2(4,pros::E_MOTOR_GEARSET_06,true,pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor right0(2,pros::E_MOTOR_GEARSET_18,false,pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor right1( 3,pros::E_MOTOR_GEARSET_18,false,pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor right2(4,pros::E_MOTOR_GEARSET_18,false,pros::E_MOTOR_ENCODER_COUNTS);
 
-pros::Motor right0(12,pros::E_MOTOR_GEARSET_06,false,pros::E_MOTOR_ENCODER_COUNTS);
-pros::Motor right1(13,pros::E_MOTOR_GEARSET_06,false,pros::E_MOTOR_ENCODER_COUNTS);
-pros::Motor right2(14,pros::E_MOTOR_GEARSET_06,false,pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor left0(17,pros::E_MOTOR_GEARSET_18,true,pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor left1(13,pros::E_MOTOR_GEARSET_18,true,pros::E_MOTOR_ENCODER_COUNTS);
+pros::Motor left2(14,pros::E_MOTOR_GEARSET_18,true,pros::E_MOTOR_ENCODER_COUNTS);
 // Intake
-pros::Motor left_intake(5,true);
+pros::Motor left_intake(16,true);
 pros::Motor right_intake(15,false);
 //Rollers
-pros::Motor bottom_rollers0(17,true);
-pros::Motor bottom_rollers1(18,true);
+pros::Motor bottom_rollers0(7,true);
+pros::Motor bottom_rollers1(8,true);
 
-pros::Motor top_roller(8,false);
+pros::Motor top_roller(5,false);
 
 pros::Imu imu (20);
 
@@ -302,6 +302,7 @@ void disabled() {}
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
+
 void competition_initialize() {}
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -326,47 +327,7 @@ void setDrive(int left,int right){
     right1=right;
     right2=right;
 }
-void resetDriveEncoders(){
-    left0.tare_position();
-    left1.tare_position();
-    left2.tare_position();
 
-    right0.tare_position();
-    right1.tare_position();
-    right2.tare_position();
-}
-double averageDriveEncoderValue(){
-    //gets all drive encoder values and averages it
-    return (((fabs((left0.get_position())))+
-            (fabs((left1.get_position())))+
-            (fabs((left2.get_position())))+
-            (fabs((right0.get_position())))+
-            (fabs((right1.get_position())))+
-            (fabs((right2.get_position())))/ 6));
-}
-void translate(int units, int voltage){ //amount of travel, power)
-    //negative means backwards
-    int direction = std::abs(units)/units;
-    //gyro assuming turning right is negative
-    //reset motor encoders
-    resetDriveEncoders();
-    imu.tare();
-    //drive forward until units are reached
-    while(std::abs(averageDriveEncoderValue()) < std::abs(units)){
-        //setDrive(voltage*direction,voltage*direction); //dum version
-        setDrive(voltage*direction+imu.get_rotation(),voltage*direction-imu.get_rotation() ); //trying to utlizie imu to correct if off
-        pros::delay(10);
-    }
-    //brief brake
-    setDrive(-10*direction,-10*direction);
-    pros::delay(50);//may adjust
-    //set drive back to neautral
-   setDrive(0,0);
-
-}
-void rotate(int units,int voltage){
-}
-///
 void intake4ever(int value){
     left_intake=value;
     right_intake=value;
@@ -403,8 +364,8 @@ void top_rollers(int value, float time){
 void intake_bottom_rollers(int value, float time){
     bottom_rollers0=-value;
     bottom_rollers1=-value;
-    left_intake=-value;
-    right_intake=-value;
+    left_intake=value;
+    right_intake=value;
     pros::delay(time);
     bottom_rollers0=0;
     bottom_rollers1=0;
@@ -470,215 +431,23 @@ void destow(){
     right_intake=0;
     top_roller=0;
 }
-void skills(){
-    //destow
-    destow();
-    //run forever intake and bottom roller
+void wallslide(){
+    top_rollers(-127,250);
+    top_rollers(127,250);
+    top_rollers(-127,250);
+    top_rollers(127,250);
+    drivetime(52,500);
+    pros::delay(2000);
     intake4ever(-127);
-    bottom4ever( -60);
-    //drive to pick up first 2 balls at an angle
-    drive_for_distance(39,leftDrive,rightDrive,0.75);
-    stoprollers();
-    //backs up to get ready 1st corner goal
-    drive_for_distance(-9,leftDrive,rightDrive,0.75);
-    turn(-80,leftDrive,rightDrive,1.0);
-    //facing corner goal
-    drive_for_distance(13,leftDrive,rightDrive,0.75);
-    drivetime(127,250); //have to do time to not break auton
-    //cycle corner goal
-    stoprollers();
-    pickup(-100, 700);
-    //descore
-    intake_bottom_rollers(100, 500);
-    //spit out the balls descored
-    drive_for_distance(-10,leftDrive,rightDrive,0.75);
-    intake_bottom_rollers(-80, 750);
-    //1st corner goal done
-    //
-    drive_for_distance(-26,leftDrive,rightDrive,0.75);
-    //turn to face red ball near center
-    turn(-120,leftDrive,rightDrive,1);
-    //backup to square on wall
-    drive_for_distance(-14,leftDrive,rightDrive,0.75);
-    drivetime(-50,1500);
-    pickup(100,400);
-    //intake center red ball
+    drivetime(69,5000);
     intake4ever(-127);
-    bottom4ever( -60);
-    //driving to center ball
-    drive_for_distance(64.5,leftDrive,rightDrive,0.5);
-    //turn -90 towards center goal on wall
-    turn(95,leftDrive,rightDrive,1);
-    //intake ball on way to center goal
-    drive_for_distance(22,leftDrive,rightDrive,0.5);
-    stoprollers();
-    drivetime(100,300);
-    //score two in center goal
-   // pickup(-127,700);
-    //second goal scored
-    //
-    //start to third goal
-    //drive to goal on white line
-    drive_for_distance(-5,leftDrive,rightDrive,0.75);
-    //spit out blue ball
-    intake_bottom_rollers(-80, 750);
-    pickup(100,400);
-    turn(-90,leftDrive,rightDrive,1);
-    intake4ever(-127);
-    bottom4ever(-60);
-    drive_for_distance(50,leftDrive,rightDrive,0.5);
-    turn(45,leftDrive,rightDrive,1);
-    drive_for_distance(15,leftDrive,rightDrive,0.5);
-    drivetime(127,500);
-    pickup(-127,1000);
-
-}
-
-void homerowleftside(){
-    //inital destow robot
-    destow();
-    pros::delay(300);
-    intake_bottom_rollers(127,300);
-    //drives to center goal
-    drive_for_distance(24,leftDrive,rightDrive,0.40, 2000);
-    turn(-133,leftDrive,rightDrive,0.5);
-    //facing corner goal A
-    //int intakes and rollers to pick up
-    intake4ever(-127);
-    //bottom4ever(-80);
-    //drives towards goal
-    drive_for_distance(15,leftDrive,rightDrive,0.40, 1500);
-    stoprollers();
-    intake4ever(-127);
-    bottom4ever(-127);
-    pros::delay(100);
-    stoprollers();
-    drive_for_distance(9.75,leftDrive,rightDrive,0.40, 1500);
-    //hit goal,scoring
-    pros::delay(200);
-    bottom_top_rollers(-127, 350);
-    intake4ever(75);
-    //
-    drive_for_distance(-8,leftDrive,rightDrive,0.4,1500);
-    stoprollers();
-    //squares up on wall, back up first and then hits wall.
-    turn(-45,leftDrive,rightDrive,0.5,2000);
-    drive_for_distance(-27.25,leftDrive,rightDrive,0.4,3000);
-    turn(-90,leftDrive,rightDrive,0.5,2000);
-   //drives across field towards other corner
-    drive_for_distance(-15,leftDrive,rightDrive,0.4,1500);
-    drive_for_distance(87,leftDrive,rightDrive,0.4,7000);
-    turn(45,leftDrive,rightDrive,0.5,5000);
-    //facing goals
-    intake4ever(-127);
-    //drives towards goal
-    drive_for_distance(42,leftDrive,rightDrive,0.40, 5000);
-    stoprollers();
-    intake4ever(-127);
-    bottom4ever(-127);
-    pros::delay(100);
-    stoprollers();
-    drive_for_distance(8,leftDrive,rightDrive,0.40, 2000);
-    //hit goal,scoring
-    pros::delay(200);
-    bottom_top_rollers(-127, 350);
-    intake4ever(75);
-    //back away , remove away from corner goal
-    drive_for_distance(-42,leftDrive,rightDrive,0.4,5000);
-    stoprollers();
-    //
-
-
-
-}
-void homerowrightside(){
-    //inital destow robot
-    destow();
-    pros::delay(300);
-    intake_bottom_rollers(127,300);
-    //drives to center goal
-    drive_for_distance(24,leftDrive,rightDrive,0.40, 3000);
-    turn(133,leftDrive,rightDrive,0.5);
-    //facing corner goal A
-    //int intakes and rollers to pick up
-    intake4ever(-127);
-    //bottom4ever(-80);
-    //drives towards goal
-    //increased time out
-    drive_for_distance(15,leftDrive,rightDrive,0.40, 1500);
-    stoprollers();
-    intake4ever(-127);
-    bottom4ever(-127);
-    pros::delay(100);
-    stoprollers();
-    drive_for_distance(11,leftDrive,rightDrive,0.40, 1500);
-    //hit goal,scoring
-    pros::delay(200);
-    bottom_top_rollers(-127, 350);
-    intake4ever(75);
-    //
-    drive_for_distance(-8,leftDrive,rightDrive,0.4,5000);
-    stoprollers();
-    //squares up on wall, back up first and then hits wall.
-    turn(45,leftDrive,rightDrive,0.5,5000);
-    drive_for_distance(-27.25,leftDrive,rightDrive,0.4,5000);
-    turn(90,leftDrive,rightDrive,0.5,5000);
-    //drives across field towards other corner
-    drive_for_distance(-15,leftDrive,rightDrive,0.4,1500);
-    drive_for_distance(87,leftDrive,rightDrive,0.4,7000);
-    turn(-45,leftDrive,rightDrive,0.5,5000);
-    //facing goals
-    intake4ever(-127);
-    //drives towards goal
-    drive_for_distance(42,leftDrive,rightDrive,0.40, 5000);
-    stoprollers();
-    intake4ever(-127);
-    bottom4ever(-127);
-    pros::delay(100);
-    stoprollers();
-    drive_for_distance(8,leftDrive,rightDrive,0.40, 2000);
-    //hit goal,scoring
-    pros::delay(200);
-    bottom_top_rollers(-127, 350);
-    intake4ever(75);
-    //back away , remove away from corner goal
-    drive_for_distance(-42,leftDrive,rightDrive,0.4,5000);
-    stoprollers();
-
-}
-void cornerMiddleRow4leftside(){
-    turn(-83,leftDrive,rightDrive,0.5,3000);
-    drive_for_distance(32,leftDrive,rightDrive,0.4,5000);
-    //drive_for_distance(10,leftDrive,rightDrive,0.40, 2000);
-    //pickup(-127,750);
-}
-void cornerMiddleRow4rightside(){
-    turn(83,leftDrive,rightDrive,0.5,3000);
-    drive_for_distance(32,leftDrive,rightDrive,0.4,5000);
-}
-void centerleftside(){
-    turn(-179,leftDrive,rightDrive,0.5,1500);
-    drive_for_distance(28,leftDrive,rightDrive,0.4,3000);
-    drive_for_distance(6,leftDrive,rightDrive,0.40, 2000);
-    pickup(-127,750);
-    drive_for_distance(-30,leftDrive,rightDrive,0.40, 4000);
-    turn(135,leftDrive,rightDrive,0.5,4000);
-    drive_for_distance(20,leftDrive,rightDrive,0.40, 3000);
-    turn(-90,leftDrive,rightDrive,0.5,1500);
-    drive_for_distance(11,leftDrive,rightDrive,0.40, 4000);
-
+    bottom4ever(80);
 }
 
 
 void autonomous() {
-   // skills();
-   //homerowleftside();
-   //cornerMiddleRow4leftside();
-   homerowrightside();
-   cornerMiddleRow4rightside();
-   //centerleftside();
-
-
+    pros::delay(33000);
+    wallslide();
 
 }
 
@@ -707,7 +476,7 @@ void opcontrol() {
     while (true) {
         //drivetrain Code
         // split arcade
-       /*
+
         int power =master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
         int turn = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
 
@@ -724,16 +493,7 @@ void opcontrol() {
         right1=right;
         right2=right;
         //end of split arcade control
-*/
-       //Tank
-        int left = master.get_analog(ANALOG_LEFT_Y);
-        int right = master.get_analog(ANALOG_RIGHT_Y);
 
-        left = std::max(left, lastPower_left - 10);
-        right = std::max(right, lastPower_right - 10);
-
-        lastPower_right = right;
-        lastPower_left = left;
 
         int threshold = 0;
         if (abs(left) > threshold) {
@@ -756,10 +516,10 @@ void opcontrol() {
         }
 
 
-        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+        if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
             bottom_rollers0 = 127;
             bottom_rollers1 = 127;
-        } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+        } else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
             bottom_rollers0 = -127;
             bottom_rollers1 = -127;
 
