@@ -457,12 +457,18 @@ void destow(float time){
     right_intake=-127;
     bottom_rollers0=127;
     bottom_rollers1=127;
-    pros::delay(time);
+    pros::delay(200);
+    bottom_rollers0=-127;
+    bottom_rollers1=-127;
+    left_intake=-127;
+    right_intake=-127;
+    top_roller=127;
+    pros::delay(400);
     bottom_rollers0=0;
     bottom_rollers1=0;
-    top_roller=0;
     left_intake=0;
     right_intake=0;
+    top_roller=0;
 }
 void skills(){
     //destow
@@ -662,13 +668,14 @@ void centerleftside(){
 
 }
 
+
 void autonomous() {
    // skills();
    //homerowleftside();
    //cornerMiddleRow4leftside();
    //homerowrightside();
    //centerleftside();
-
+    destow(1000);
 
 
 }
