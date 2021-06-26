@@ -466,6 +466,7 @@ void autonomous() {
  */
 
 
+
 void opcontrol() {
 //Typhoon
 
@@ -474,6 +475,112 @@ void opcontrol() {
 
 
     while (true) {
+
+
+#define INTAKE_MASK 1
+#define ROLLER_MASK 2
+#define TOP_MASK 4
+
+        int mask = 0;
+
+        int rollers = 0;
+        int topRollers = 0;
+        int intake = 0;
+
+        int arcade_y = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int arcade_x = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+
+        //arcade to tank
+        int tank_left = arcade_y + arcade_x;
+        int tank_right = arcade_y + -arcade_x;
+
+        //update drive
+        left0 = tank_left;
+        left1 = tank_left;
+        left2 = tank_left;
+
+        right0 = tank_right;
+        right1 = tank_right;
+        right2 = tank_right;
+
+        // updateMotorGroup(topRollers, -0);
+        // updateMotorGroup(rollers, -0);
+        // updateMotorGroup(intake, -0);
+
+        if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1)){
+            if(!(mask & ROLLER_MASK)){
+                rollers = 127;
+            }
+            if(!(mask & TOP_MASK)){
+                topRollers = 127;
+            }
+
+            mask |= ROLLER_MASK | TOP_MASK;
+        }
+
+        if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)){
+            if(!(mask & TOP_MASK)){
+                topRollers = -127*.5;
+            }
+            if(!(mask & ROLLER_MASK)){
+                rollers = 127;
+            }
+
+            if(!(mask & INTAKE_MASK)){
+                intake = 127;
+            }
+            mask |= ROLLER_MASK | TOP_MASK | INTAKE_MASK;
+        }
+
+        if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)){
+            if(!(mask & TOP_MASK)){
+                topRollers = -127;
+            }
+            if(!(mask & ROLLER_MASK)){
+                rollers = -127;
+            }
+
+            if(!(mask & INTAKE_MASK)){
+                intake = -127;
+            }
+            mask |= ROLLER_MASK | TOP_MASK | INTAKE_MASK;
+        }
+
+        if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L2)){
+            if(!(mask & ROLLER_MASK)){
+                rollers = -127;
+            }
+
+            if(!(mask & TOP_MASK)){
+                topRollers = -127;
+            }
+            mask |= ROLLER_MASK | TOP_MASK;
+        }
+
+        if(!(mask & 1)){
+            intake = 0;
+        }
+        if(!(mask & 2)){
+            rollers = 0;
+        }
+        if(!(mask & 4)){
+            topRollers = 0;
+        }
+
+        intake = -intake;
+
+        left_intake = intake;
+        right_intake = intake;
+
+        bottom_rollers0 = rollers;
+        bottom_rollers1 = rollers;
+
+        top_roller = topRollers;
+
+        continue;
+
+        //OLD TRENT CODE
+
         //drivetrain Code
         // split arcade
 
