@@ -452,7 +452,7 @@ void drivetime(int value,float time){
     left0=0;
 }
 
-void destow(float time){
+void destow(){
     left_intake=-127;
     right_intake=-127;
     bottom_rollers0=127;
@@ -472,7 +472,7 @@ void destow(float time){
 }
 void skills(){
     //destow
-    destow(500);
+    destow();
     //run forever intake and bottom roller
     intake4ever(-127);
     bottom4ever( -60);
@@ -536,7 +536,7 @@ void skills(){
 
 void homerowleftside(){
     //inital destow robot
-    destow(500);
+    destow();
     pros::delay(300);
     intake_bottom_rollers(127,300);
     //drives to center goal
@@ -593,7 +593,7 @@ void homerowleftside(){
 }
 void homerowrightside(){
     //inital destow robot
-    destow(500);
+    destow();
     pros::delay(300);
     intake_bottom_rollers(127,300);
     //drives to center goal
@@ -645,7 +645,7 @@ void homerowrightside(){
     drive_for_distance(-42,leftDrive,rightDrive,0.4,5000);
     stoprollers();
     //
-
+    destow();
 
 
 }
@@ -675,7 +675,7 @@ void autonomous() {
    //cornerMiddleRow4leftside();
    //homerowrightside();
    //centerleftside();
-    destow(1000);
+
 
 
 }
