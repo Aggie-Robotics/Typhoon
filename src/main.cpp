@@ -644,16 +644,17 @@ void homerowrightside(){
     //back away , remove away from corner goal
     drive_for_distance(-42,leftDrive,rightDrive,0.4,5000);
     stoprollers();
-    //
-    destow();
-
 
 }
 void cornerMiddleRow4leftside(){
     turn(-83,leftDrive,rightDrive,0.5,3000);
-    drive_for_distance(28,leftDrive,rightDrive,0.4,5000);
-    drive_for_distance(10,leftDrive,rightDrive,0.40, 2000);
-    pickup(-127,750);
+    drive_for_distance(32,leftDrive,rightDrive,0.4,5000);
+    //drive_for_distance(10,leftDrive,rightDrive,0.40, 2000);
+    //pickup(-127,750);
+}
+void cornerMiddleRow4rightside(){
+    turn(83,leftDrive,rightDrive,0.5,3000);
+    drive_for_distance(32,leftDrive,rightDrive,0.4,5000);
 }
 void centerleftside(){
     turn(-179,leftDrive,rightDrive,0.5,1500);
@@ -673,7 +674,8 @@ void autonomous() {
    // skills();
    //homerowleftside();
    //cornerMiddleRow4leftside();
-   //homerowrightside();
+   homerowrightside();
+   cornerMiddleRow4rightside();
    //centerleftside();
 
 
