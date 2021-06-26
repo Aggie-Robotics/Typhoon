@@ -243,8 +243,6 @@ void drive_for_distance(int32_t distance_in, Motorgroup& left_drive, Motorgroup&
     }
 }
 
-//set motors brake and coast
-
 void on_center_button() {
     static bool pressed = false;
     pressed = !pressed;
@@ -368,6 +366,7 @@ void translate(int units, int voltage){ //amount of travel, power)
 }
 void rotate(int units,int voltage){
 }
+///
 void intake4ever(int value){
     left_intake=value;
     right_intake=value;
@@ -529,23 +528,147 @@ void skills(){
 
 }
 
-void AutonMatch(){
+void homerowleftside(){
+    //inital destow robot
     destow(500);
-
-    drive_for_distance((ticktoinch*24),leftDrive,rightDrive,0.40, 5000);
-
+    pros::delay(300);
+    intake_bottom_rollers(127,300);
+    //drives to center goal
+    drive_for_distance(24,leftDrive,rightDrive,0.40, 2000);
     turn(-133,leftDrive,rightDrive,0.5);
+    //facing corner goal A
+    //int intakes and rollers to pick up
     intake4ever(-127);
-    bottom4ever(-80);
-    drive_for_distance((ticktoinch*20),leftDrive,rightDrive,0.40, 5000);
+    //bottom4ever(-80);
+    //drives towards goal
+    drive_for_distance(15,leftDrive,rightDrive,0.40, 1500);
     stoprollers();
-    drive_for_distance(ticktoinch*4.5,leftDrive,rightDrive,0.40, 5000);
-    bottom_top_rollers(-127, 750);
+    intake4ever(-127);
+    bottom4ever(-127);
+    pros::delay(100);
+    stoprollers();
+    drive_for_distance(9.75,leftDrive,rightDrive,0.40, 1500);
+    //hit goal,scoring
+    pros::delay(200);
+    bottom_top_rollers(-127, 350);
     intake4ever(75);
+    //
+    drive_for_distance(-8,leftDrive,rightDrive,0.4,1500);
+    stoprollers();
+    //squares up on wall, back up first and then hits wall.
+    turn(-45,leftDrive,rightDrive,0.5,2000);
+    drive_for_distance(-27.25,leftDrive,rightDrive,0.4,3000);
+    turn(-90,leftDrive,rightDrive,0.5,2000);
+   //drives across field towards other corner
+    drive_for_distance(-15,leftDrive,rightDrive,0.4,1500);
+    drive_for_distance(87,leftDrive,rightDrive,0.4,7000);
+    turn(45,leftDrive,rightDrive,0.5,5000);
+    //facing goals
+    intake4ever(-127);
+    //drives towards goal
+    drive_for_distance(42,leftDrive,rightDrive,0.40, 5000);
+    stoprollers();
+    intake4ever(-127);
+    bottom4ever(-127);
+    pros::delay(100);
+    stoprollers();
+    drive_for_distance(8,leftDrive,rightDrive,0.40, 2000);
+    //hit goal,scoring
+    pros::delay(200);
+    bottom_top_rollers(-127, 350);
+    intake4ever(75);
+    //back away , remove away from corner goal
+    drive_for_distance(-42,leftDrive,rightDrive,0.4,5000);
+    stoprollers();
+    //
+
+
+
 }
+void homerowrightside(){
+    //inital destow robot
+    destow(500);
+    pros::delay(300);
+    intake_bottom_rollers(127,300);
+    //drives to center goal
+    drive_for_distance(24,leftDrive,rightDrive,0.40, 3000);
+    turn(133,leftDrive,rightDrive,0.5);
+    //facing corner goal A
+    //int intakes and rollers to pick up
+    intake4ever(-127);
+    //bottom4ever(-80);
+    //drives towards goal
+    //increased time out
+    drive_for_distance(15,leftDrive,rightDrive,0.40, 1500);
+    stoprollers();
+    intake4ever(-127);
+    bottom4ever(-127);
+    pros::delay(100);
+    stoprollers();
+    drive_for_distance(11,leftDrive,rightDrive,0.40, 1500);
+    //hit goal,scoring
+    pros::delay(200);
+    bottom_top_rollers(-127, 350);
+    intake4ever(75);
+    //
+    drive_for_distance(-8,leftDrive,rightDrive,0.4,5000);
+    stoprollers();
+    //squares up on wall, back up first and then hits wall.
+    turn(45,leftDrive,rightDrive,0.5,5000);
+    drive_for_distance(-27.25,leftDrive,rightDrive,0.4,5000);
+    turn(90,leftDrive,rightDrive,0.5,5000);
+    //drives across field towards other corner
+    drive_for_distance(-15,leftDrive,rightDrive,0.4,1500);
+    drive_for_distance(87,leftDrive,rightDrive,0.4,7000);
+    turn(-45,leftDrive,rightDrive,0.5,5000);
+    //facing goals
+    intake4ever(-127);
+    //drives towards goal
+    drive_for_distance(42,leftDrive,rightDrive,0.40, 5000);
+    stoprollers();
+    intake4ever(-127);
+    bottom4ever(-127);
+    pros::delay(100);
+    stoprollers();
+    drive_for_distance(8,leftDrive,rightDrive,0.40, 2000);
+    //hit goal,scoring
+    pros::delay(200);
+    bottom_top_rollers(-127, 350);
+    intake4ever(75);
+    //back away , remove away from corner goal
+    drive_for_distance(-42,leftDrive,rightDrive,0.4,5000);
+    stoprollers();
+    //
+
+
+
+}
+void cornerMiddleRow4leftside(){
+    turn(-83,leftDrive,rightDrive,0.5,3000);
+    drive_for_distance(28,leftDrive,rightDrive,0.4,5000);
+    drive_for_distance(10,leftDrive,rightDrive,0.40, 2000);
+    pickup(-127,750);
+}
+void centerleftside(){
+    turn(-179,leftDrive,rightDrive,0.5,1500);
+    drive_for_distance(28,leftDrive,rightDrive,0.4,3000);
+    drive_for_distance(6,leftDrive,rightDrive,0.40, 2000);
+    pickup(-127,750);
+    drive_for_distance(-30,leftDrive,rightDrive,0.40, 4000);
+    turn(135,leftDrive,rightDrive,0.5,4000);
+    drive_for_distance(20,leftDrive,rightDrive,0.40, 3000);
+    turn(-90,leftDrive,rightDrive,0.5,1500);
+    drive_for_distance(11,leftDrive,rightDrive,0.40, 4000);
+
+}
+
 void autonomous() {
    // skills();
-   AutonMatch();
+   //homerowleftside();
+   //cornerMiddleRow4leftside();
+   //homerowrightside();
+   //centerleftside();
+
 
 
 }
