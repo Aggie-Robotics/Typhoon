@@ -442,11 +442,12 @@ void wallslide(){
     drivetime(69,5000);
     intake4ever(-127);
     bottom4ever(80);
+
 }
 
 
 void autonomous() {
-    pros::delay(33000);
+    pros::delay(36000);
     wallslide();
 
 }
